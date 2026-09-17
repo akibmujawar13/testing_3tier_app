@@ -1,0 +1,22 @@
+server:
+  port: ${BACKEND_PORT:8080}
+  shutdown: graceful
+spring:
+  application: { name: ${APP_NAME:observability-commerce-platform} }
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:observability_db}
+    username: ${DB_USERNAME:observability_user}
+    password: ${DB_PASSWORD:change_me}
+    hikari: { minimum-idle: ${DB_POOL_MIN_SIZE:2}, maximum-pool-size: ${DB_POOL_MAX_SIZE:10}, pool-name: ObservabilityPool }
+  sql: { init: { mode: never } }
+  lifecycle: { timeout-per-shutdown-phase: 20s }
+management:
+  endpoints: { web: { exposure: { include: health,info,metrics,prometheus } } }
+  endpoint: { health: { show-details: never } }
+info: { app: { name: ${APP_NAME:observability-commerce-platform}, version: ${APP_VERSION:1.0.0}, environment: ${APP_ENV:dev} } }
+logging: { level: { root: ${LOG_LEVEL:INFO} }, pattern: { console: '%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} requestId=%X{requestId} correlationId=%X{correlationId} - %msg%n' } }
+app:
+  diagnostic: { enabled: ${ENABLE_DIAGNOSTIC_ENDPOINTS:true}, delay-ms: ${DIAGNOSTIC_DELAY_MS:3000}, slow-db-enabled: ${ENABLE_SLOW_DB_TESTS:false} }
+  payment: { url: ${PAYMENT_SERVICE_URL:http://localhost:8080/mock/payment}, delay-ms: ${PAYMENT_DELAY_MS:150}, failure-rate: ${PAYMENT_FAILURE_RATE:0} }
+  shipping: { url: ${SHIPPING_SERVICE_URL:http://localhost:8080/mock/shipping}, delay-ms: ${SHIPPING_DELAY_MS:200}, failure-rate: ${SHIPPING_FAILURE_RATE:0} }
+  cors: { origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000} }

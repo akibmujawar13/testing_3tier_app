@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+set -euo pipefail; source "$(dirname "$0")/lib.sh"; load_env; for n in backend frontend; do if pid_running "$RUN/$n.pid"; then echo "${n^} : RUNNING"; else echo "${n^} : STOPPED"; fi; done; if command -v psql >/dev/null && PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DB_NAME" -c 'SELECT 1' >/dev/null 2>&1; then echo "Database : UP : $DB_HOST:$DB_PORT"; else echo "Database : DOWN : $DB_HOST:$DB_PORT"; fi

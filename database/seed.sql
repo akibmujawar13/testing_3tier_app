@@ -1,0 +1,12 @@
+INSERT INTO categories(name,description) VALUES ('Networking','Enterprise connectivity'),('Compute','Servers and edge devices'),('Storage','Data storage'),('Security','Security appliances'),('Office','Operations equipment');
+INSERT INTO customers(customer_number,first_name,last_name,email,company) SELECT 'CUST-'||lpad(g::text,4,'0'),'Customer'||g,'Sample','customer'||g||'@example.test','Example Company '||g FROM generate_series(1,120) g;
+INSERT INTO addresses(customer_id,type,line1,city,state,postal_code) SELECT id,'BILLING',id||' Market Street','Austin','TX','78701' FROM customers;
+INSERT INTO products(sku,name,description,category_id,price) SELECT 'SKU-'||lpad(g::text,4,'0'),'Enterprise Product '||g,'Seeded catalog item for APM testing',((g-1)%5)+1,round((25+g*3.75)::numeric,2) FROM generate_series(1,125) g;
+INSERT INTO inventory(product_id,quantity,reorder_level) SELECT id,CASE WHEN id%17=0 THEN 5 ELSE 30+(id%90) END,10 FROM products;
+INSERT INTO discounts(code,percentage) VALUES ('WELCOME10',10),('OPS15',15);
+INSERT INTO orders(order_number,customer_id,status,total_amount,discount_amount,created_at) SELECT 'ORD-SEED-'||lpad(g::text,4,'0'),((g-1)%120)+1,(ARRAY['DELIVERED','SHIPPED','PROCESSING','PAYMENT_COMPLETED','PAYMENT_FAILED','ORDER_CREATED'])[1+(g%6)],round((50+g*11.2)::numeric,2),0,now()-(g||' hours')::interval FROM generate_series(1,240) g;
+INSERT INTO order_items(order_id,product_id,quantity,unit_price,line_total) SELECT o.id,((o.id-1)%125)+1,1,p.price,p.price FROM orders o JOIN products p ON p.id=((o.id-1)%125)+1;
+INSERT INTO payments(order_id,status,amount,provider_reference) SELECT id,CASE WHEN status='PAYMENT_FAILED' THEN 'FAILED' ELSE 'COMPLETED' END,total_amount,'pay-seed-'||id FROM orders;
+INSERT INTO shipments(order_id,status,tracking_number) SELECT id,CASE WHEN status='DELIVERED' THEN 'DELIVERED' WHEN status='SHIPPED' THEN 'SHIPPED' ELSE 'PENDING' END,'TRACK-'||id FROM orders;
+INSERT INTO order_status_history(order_id,status,message) SELECT id,status,'Seeded lifecycle event' FROM orders;
+INSERT INTO application_events(event_type,message) VALUES ('STARTUP','Database seeded'),('INVENTORY','Low stock scan completed'),('ORDER','Seeded orders available');

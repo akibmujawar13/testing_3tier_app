@@ -1,0 +1,1 @@
+const base=process.env.NEXT_PUBLIC_API_BASE_URL||'http://localhost:8080'; export async function api(path:string){const r=await fetch(base+'/api/v1'+path,{cache:'no-store',headers:{'X-Correlation-ID':'ui-'+Date.now()}});if(!r.ok)throw new Error('API '+r.status);return r.json();}
